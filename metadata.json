@@ -1,0 +1,6 @@
+{
+  "name": "Smart IPTV Player",
+  "description": "A high-performance live TV streaming player containing 120+ Bangla, sports, news, and entertainment channels. Features favorites and stream debug-diagnostics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
