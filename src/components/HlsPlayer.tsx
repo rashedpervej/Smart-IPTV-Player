@@ -44,6 +44,32 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
     mimeType?: string;
   }>({});
   const [showDiagnostics, setShowDiagnostics] = useState<boolean>(false);
+  const [showControls, setShowControls] = useState<boolean>(true);
+  const controlsTimeoutRef = useRef<any>(null);
+
+  const resetControlsTimeout = () => {
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    controlsTimeoutRef.current = setTimeout(() => {
+      setShowControls(false);
+    }, 2000);
+  };
+
+  useEffect(() => {
+    resetControlsTimeout();
+    return () => {
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleUserInteraction = () => {
+    setShowControls(true);
+    resetControlsTimeout();
+  };
+
   const activeStreamRef = useRef<{ url: string; retryCount: number }>({ url: "", retryCount: 0 });
 
   // Trigger onStatusChange callback when status updates
@@ -293,6 +319,21 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
     setRetryCount(prev => prev + 1);
   };
 
+  const handlePlayerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('.control-panel-intercept')) {
+      return;
+    }
+
+    if (!showControls) {
+      setShowControls(true);
+      resetControlsTimeout();
+    } else {
+      togglePlay();
+      resetControlsTimeout();
+    }
+  };
+
   // Determine error style or messaging
   const isDirectTsFile = url.endsWith(".ts");
   const isHttpsPage = typeof window !== "undefined" && window.location.protocol === "https:";
@@ -300,7 +341,12 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
   const isMixedContentError = isHttpsPage && isHttpStream;
 
   return (
-    <div className="relative group rounded-3xl bg-[#0e0e14] border border-zinc-900 shadow-2xl overflow-hidden aspect-video flex flex-col justify-between">
+    <div 
+      className="relative group rounded-3xl bg-[#0e0e14] border border-zinc-900 shadow-2xl overflow-hidden aspect-video flex flex-col justify-between"
+      onClick={handlePlayerClick}
+      onMouseMove={handleUserInteraction}
+      onTouchStart={handleUserInteraction}
+    >
       {/* Aspect Video frame */}
       <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black">
         <video
@@ -309,12 +355,11 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
           playsInline
           autoPlay
           muted={isMuted}
-          onClick={togglePlay}
         />
         
         {/* Banner Overlays & Messages (Ad-block warning, offline warnings, direct file info) */}
         {status === "loading" && (
-          <div className="absolute inset-0 bg-[#07070a]/95 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 z-10 animate-in fade-in duration-200">
+          <div className="control-panel-intercept absolute inset-0 bg-[#07070a]/95 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 z-10 animate-in fade-in duration-200">
             <div className="relative flex items-center justify-center h-16 w-16 mb-4">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-20"></span>
               <span className="relative inline-flex rounded-full h-11 w-11 bg-gradient-to-br from-amber-500 to-amber-600 animate-pulse justify-center items-center text-stone-950 font-black text-sm shadow-lg shadow-amber-500/15">
@@ -327,7 +372,7 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
         )}
 
         {status === "error" && (
-          <div className="absolute inset-0 bg-[#07070a] flex flex-col items-center justify-center text-center p-6 md:p-8 z-10 overflow-y-auto animate-in fade-in duration-200">
+          <div className="control-panel-intercept absolute inset-0 bg-[#07070a] flex flex-col items-center justify-center text-center p-6 md:p-8 z-10 overflow-y-auto animate-in fade-in duration-200">
             {isMixedContentError ? (
               <div className="max-w-xl flex flex-col items-center">
                 <div className="p-2.5 bg-amber-500/15 text-amber-400 rounded-2xl mb-3 border border-amber-500/20 animate-pulse">
@@ -425,7 +470,10 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
 
       {/* Diagnostics panel overlay */}
       {showDiagnostics && (
-        <div className="absolute top-4 left-4 right-4 bg-[#07070a]/95 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-4 text-left z-20 shadow-2xl animate-in fade-in slide-in-from-top-2">
+        <div 
+          className="control-panel-intercept absolute top-4 left-4 right-4 bg-[#07070a]/95 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-4 text-left z-20 shadow-2xl animate-in fade-in slide-in-from-top-2" 
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex justify-between items-center mb-2.5 border-b border-zinc-800/80 pb-2">
             <h4 className="text-xs text-white font-extrabold flex items-center gap-1.5 uppercase tracking-wider">
               <Activity className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
@@ -454,7 +502,10 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
       )}
 
       {/* Top Bar overlay - Brand / Channel description */}
-      <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 to-transparent flex justify-between items-start opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 z-10 pointer-events-none">
+      <div 
+        className={`control-panel-intercept absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 to-transparent flex justify-between items-start transition-opacity duration-300 z-10 ${showControls ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center gap-2">
           <div className="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-amber-600 text-[10px] text-stone-950 font-black tracking-widest uppercase rounded">
             Live TV
@@ -468,7 +519,10 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
         </div>
         <div className="pointer-events-auto flex items-center gap-1.5">
           <button
-            onClick={() => setShowDiagnostics(!showDiagnostics)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowDiagnostics(!showDiagnostics);
+            }}
             className="p-1.5 px-2.5 bg-zinc-900/80 hover:bg-zinc-900 border border-zinc-800/80 backdrop-blur-sm rounded-lg text-zinc-200 hover:text-white transition-all text-[10px] font-bold flex items-center gap-1.5 cursor-pointer"
             title="Stream Debug Diagnostics"
           >
@@ -479,13 +533,16 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
       </div>
 
       {/* Bottom custom custom controls panel */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#050508] to-transparent opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 z-10 flex flex-col gap-2">
+      <div 
+        className={`control-panel-intercept absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#050508] to-transparent transition-opacity duration-300 z-10 flex flex-col gap-2 ${showControls ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between pointer-events-auto">
           {/* Left Controls */}
           <div className="flex items-center gap-3">
             <button
               onClick={togglePlay}
-              className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all active:scale-90 cursor-pointer"
+              className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all active:scale-95 cursor-pointer"
               title={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5 fill-white text-white" />}
@@ -493,7 +550,7 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
 
             <button
               onClick={handleRetry}
-              className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all active:scale-90 cursor-pointer"
+              className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all active:scale-95 cursor-pointer"
               title="Restart Stream"
             >
               <RotateCcw className="h-3.5 w-3.5" />
@@ -503,7 +560,7 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
             <div className="flex items-center gap-2 group/volume ml-1">
               <button
                 onClick={toggleMute}
-                className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all active:scale-90 cursor-pointer"
+                className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all active:scale-95 cursor-pointer"
               >
                 {isMuted || volume === 0 ? <VolumeX className="h-3.5 w-3.5 text-rose-400" /> : <Volume2 className="h-3.5 w-3.5" />}
               </button>
@@ -527,7 +584,7 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
             </span>
             <button
               onClick={handleFullscreen}
-              className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all active:scale-90 cursor-pointer"
+              className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all active:scale-95 cursor-pointer"
               title="Full Screen Mode"
             >
               <Maximize className="h-3.5 w-3.5" />
