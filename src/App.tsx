@@ -33,6 +33,7 @@ export default function App() {
   const [isCategoriesExpanded, setIsCategoriesExpanded] = useState<boolean>(false);
   const [isHoveredSidebar, setIsHoveredSidebar] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isSearchActive, setIsSearchActive] = useState<boolean>(false);
   const [showHidden, setShowHidden] = useState<boolean>(true); // default true to load all sports links
   const [viewMode, setViewMode] = useState<"list" | "grid">(() => {
     try {
@@ -333,21 +334,6 @@ export default function App() {
           onMouseLeave={() => setIsHoveredSidebar(false)}
           className="order-2 lg:order-1 col-span-1 lg:col-span-4 flex flex-col gap-5"
         >
-          
-          {/* Quick Filters Panel (Search and Hidden Mode Switcher) */}
-          <div className="bg-[#0e0e14] p-5 rounded-3xl border border-zinc-900/80 flex flex-col gap-3.5 shadow-xl shadow-black/10">
-            <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 h-4 w-4" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search channels, languages, matches..."
-                className="w-full bg-[#07070a]/80 border border-zinc-800/80 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all duration-200"
-                id="search-input"
-              />
-            </div>
-          </div>
 
           {/* Scrolling Categories Rails */}
           <div className="flex flex-col gap-2 bg-[#0e0e14] p-4.5 rounded-3xl border border-zinc-900/80 shadow-xl shadow-black/10">
@@ -427,45 +413,87 @@ export default function App() {
 
           {/* Dynamic Channels Playlist Grid */}
           <div className="flex flex-col gap-2 flex-1 max-h-[480px] lg:max-h-[580px] overflow-y-auto pr-1 overscroll-contain">
-            <div className="flex items-center justify-between px-2 mb-1.5 pt-1">
-              <h2 className="text-[11px] font-bold text-zinc-400 tracking-wider uppercase flex items-center gap-1.5 select-none">
-                <ListVideo className="h-4 w-4 text-amber-500" />
-                Channels ({filteredChannels.length})
-              </h2>
-              <div className="flex items-center gap-2">
-                {searchQuery && (
-                  <button 
-                    onClick={() => setSearchQuery("")} 
-                    className="text-[10px] text-amber-400 font-semibold hover:text-amber-300 transition-colors cursor-pointer mr-1.5"
-                  >
-                    Clear search
-                  </button>
-                )}
-                <div className="flex items-center bg-[#07070a] p-1 rounded-xl border border-zinc-800/80">
+            <div className="flex flex-col gap-1.5 px-2 mb-2 pb-2 border-b border-zinc-900/40">
+              <div className="flex items-center justify-between pt-1">
+                <h2 className="text-[11px] font-bold text-zinc-400 tracking-wider uppercase flex items-center gap-1.5 select-none">
+                  <ListVideo className="h-4 w-4 text-amber-500" />
+                  Channels ({filteredChannels.length})
+                </h2>
+                
+                <div className="flex items-center gap-2">
+                  {/* Search Button Toggle */}
                   <button
-                    onClick={() => setViewMode("list")}
-                    className={`p-1 rounded-lg transition-all cursor-pointer ${
-                      viewMode === "list" 
-                        ? "bg-amber-500 text-stone-950 shadow-md" 
-                        : "text-zinc-500 hover:text-zinc-300"
+                    onClick={() => {
+                      setIsSearchActive(!isSearchActive);
+                      if (isSearchActive) {
+                        setSearchQuery("");
+                      }
+                    }}
+                    className={`p-1 rounded-lg transition-all cursor-pointer border ${
+                      isSearchActive || searchQuery
+                        ? "bg-amber-500/10 border-amber-500/30 text-amber-400 font-extrabold" 
+                        : "text-zinc-500 hover:text-zinc-300 border-transparent"
                     }`}
-                    title="List View"
+                    title="Search channels"
                   >
-                    <List className="h-3.5 w-3.5 stroke-[2.5]" />
+                    <Search className="h-3.5 w-3.5 stroke-[2.5]" />
                   </button>
-                  <button
-                    onClick={() => setViewMode("grid")}
-                    className={`p-1 rounded-lg transition-all cursor-pointer ${
-                      viewMode === "grid" 
-                        ? "bg-amber-500 text-stone-950 shadow-md" 
-                        : "text-zinc-500 hover:text-zinc-300"
-                    }`}
-                    title="Grid View"
-                  >
-                    <LayoutGrid className="h-3.5 w-3.5 stroke-[2.5]" />
-                  </button>
+
+                  <div className="flex items-center bg-[#07070a] p-1 rounded-xl border border-zinc-800/80">
+                    <button
+                      onClick={() => setViewMode("list")}
+                      className={`p-1 rounded-lg transition-all cursor-pointer ${
+                        viewMode === "list" 
+                          ? "bg-amber-500 text-stone-950 shadow-md" 
+                          : "text-zinc-500 hover:text-zinc-300"
+                      }`}
+                      title="List View"
+                    >
+                      <List className="h-3.5 w-3.5 stroke-[2.5]" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode("grid")}
+                      className={`p-1 rounded-lg transition-all cursor-pointer ${
+                        viewMode === "grid" 
+                          ? "bg-amber-500 text-stone-950 shadow-md" 
+                          : "text-zinc-500 hover:text-zinc-300"
+                      }`}
+                      title="Grid View"
+                    >
+                      <LayoutGrid className="h-3.5 w-3.5 stroke-[2.5]" />
+                    </button>
+                  </div>
                 </div>
               </div>
+
+              {/* Collapsible Search Input Field Box */}
+              {(isSearchActive || searchQuery) && (
+                <div className="relative mt-1.5 animate-in slide-in-from-top-1 duration-150">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 h-3.5 w-3.5" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={e => {
+                      setSearchQuery(e.target.value);
+                      if (!isSearchActive) {
+                        setIsSearchActive(true);
+                      }
+                    }}
+                    placeholder="Search channels, languages, matches..."
+                    className="w-full bg-[#07070a]/95 border border-zinc-800/85 rounded-xl pl-9 pr-8 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all duration-200"
+                    id="search-input"
+                    autoFocus
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-all text-sm leading-none"
+                    >
+                      &times;
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             {filteredChannels.length === 0 ? (
