@@ -306,7 +306,7 @@ export default function App() {
       )}
 
       {/* Main Header */}
-      <header className="border-b border-zinc-900/80 bg-[#0c0c11]/90 backdrop-blur-md sticky top-0 z-40 px-4 md:px-8 py-4.5 flex flex-col md:flex-row gap-4 justify-between items-center shadow-lg shadow-black/20">
+      <header className="border-b border-zinc-900/80 bg-[#0c0c11]/90 backdrop-blur-md relative md:sticky top-0 z-40 px-4 md:px-8 py-4.5 flex flex-col md:flex-row gap-4 justify-between items-center shadow-lg shadow-black/20">
         <div className="flex items-center gap-3.5">
           <div className="p-2.5 bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20 rounded-2xl text-amber-400 shadow-lg shadow-amber-500/5">
             <Tv className="h-6 w-6 stroke-[1.5]" />
@@ -320,45 +320,18 @@ export default function App() {
                 PRO v6.0
               </span>
             </div>
-            <p className="text-[11px] text-zinc-400 font-medium tracking-wide">
-              Made with <Heart className="h-2.5 w-2.5 inline fill-amber-500 stroke-none mb-0.5 animate-pulse" /> by rashedpervej | IPTV HEXA & xfireflix base
-            </p>
           </div>
         </div>
 
-        {/* Live clocks & Statistics bar */}
-        <div className="flex items-center gap-3 flex-wrap md:flex-nowrap justify-center select-none">
-          {/* UTC Clock */}
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#121218]/90 border border-zinc-800/80 rounded-xl shadow-inner">
-            <Clock className="h-3.5 w-3.5 text-amber-400" />
-            <span className="text-xs font-mono font-medium text-stone-200 tracking-wide">{bdClock || "Loading Clock..."}</span>
-          </div>
-
-          {/* Quick Stats */}
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#121218]/90 border border-zinc-800/80 rounded-xl text-xs text-zinc-300 font-mono shadow-inner">
-            <Radio className="h-3.5 w-3.5 text-teal-400 animate-pulse" />
-            <span>Active: <strong className="text-white font-semibold">{allChannels.length}</strong></span>
-          </div>
-
-          {/* Add custom Link CTA button */}
-          <button
-            onClick={() => setShowCustomModal(true)}
-            className="px-4 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-bold text-xs rounded-xl shadow-lg shadow-amber-500/10 transition-all duration-200 active:scale-95 flex items-center gap-1.5 cursor-pointer"
-          >
-            <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
-            Add URL
-          </button>
-        </div>
+       
       </header>
-
-      {/* Primary Layout Arena */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 leading-normal">
         
         {/* Left Side Column: TV Channels Organizer & Sidebar (4 cols) */}
         <div 
           onMouseEnter={() => setIsHoveredSidebar(true)}
           onMouseLeave={() => setIsHoveredSidebar(false)}
-          className="col-span-1 lg:col-span-4 flex flex-col gap-5"
+          className="order-2 lg:order-1 col-span-1 lg:col-span-4 flex flex-col gap-5"
         >
           
           {/* Quick Filters Panel (Search and Hidden Mode Switcher) */}
@@ -373,25 +346,6 @@ export default function App() {
                 className="w-full bg-[#07070a]/80 border border-zinc-800/80 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all duration-200"
                 id="search-input"
               />
-            </div>
-
-            {/* Sub Filter: Toggle Hidden Channels Support */}
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-zinc-400 font-medium">Including Hidden VIP Links</span>
-              <button
-                onClick={() => {
-                  setShowHidden(!showHidden);
-                  triggerToast(showHidden ? "Filtered out hidden channels" : "Showing all default hidden VIP streams");
-                }}
-                className={`py-1 px-3 rounded-xl border flex items-center gap-1.5 cursor-pointer font-bold text-[11px] uppercase tracking-wide transition-all duration-250 ${
-                  showHidden 
-                    ? "bg-amber-500/10 border-amber-500/30 text-amber-400" 
-                    : "bg-[#07070a] border-zinc-800 text-zinc-400 hover:text-white"
-                }`}
-              >
-                {showHidden ? <Eye className="h-3 w-3 text-amber-400" /> : <EyeOff className="h-3 w-3" />}
-                {showHidden ? "Enabled" : "Disabled"}
-              </button>
             </div>
           </div>
 
@@ -696,21 +650,23 @@ export default function App() {
         </div>
 
         {/* Right Side Column: Video Player screen & Controls (8 cols) */}
-        <div className="col-span-1 lg:col-span-8 flex flex-col gap-6">
+        <div className="order-1 lg:order-2 col-span-1 lg:col-span-8 flex flex-col gap-6">
           
           {selectedChannel ? (
             <div className="flex flex-col gap-5">
               
-              {/* Premium Hls Video player viewport frame */}
-              <HlsPlayer
-                url={selectedChannel.url}
-                name={selectedChannel.name}
-                category={selectedChannel.category}
-                onStatusChange={(s) => setPlayerStatus(s)}
-              />
+              {/* Premium Hls Video player viewport frame - sticky on mobile screens */}
+              <div className="sticky top-0 z-40 lg:relative lg:top-auto lg:z-auto -mx-4 px-4 py-2 bg-[#07070a]/95 backdrop-blur-md lg:p-0 lg:bg-transparent lg:backdrop-blur-none border-b border-zinc-900 lg:border-none shadow-lg lg:shadow-none">
+                <HlsPlayer
+                  url={selectedChannel.url}
+                  name={selectedChannel.name}
+                  category={selectedChannel.category}
+                  onStatusChange={(s) => setPlayerStatus(s)}
+                />
+              </div>
 
               {/* Station Metadatas & Controls dashboard */}
-              <div className="bg-[#0e0e14] border border-zinc-900/80 p-5 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl shadow-black/15">
+              <div className="hidden md:flex bg-[#0e0e14] border border-zinc-900/80 p-5 rounded-3xl flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl shadow-black/15">
                 
                 {/* Station general header details */}
                 <div className="flex gap-4 items-center">
@@ -771,48 +727,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Dynamic Schedules & TV Guide block */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                
-                {/* Simulated EPG block */}
-                <div className="bg-[#0e0e14]/60 border border-zinc-900/80 p-5 rounded-3xl shadow-xl shadow-black/5">
-                  <div className="flex items-center gap-2 mb-3.5 border-b border-zinc-900/80 pb-2.5">
-                    <Clock className="h-4 w-4 text-amber-400" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-300">Live Program Scheduler</h3>
-                  </div>
-                  <div className="space-y-4">
-                    <div>
-                      <span className="text-[9px] font-extrabold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 tracking-wider">NOW BROADCASTING</span>
-                      <p className="text-sm font-bold text-white mt-2">{getMockSchedule(selectedChannel.name).current}</p>
-                      <p className="text-xs text-zinc-500 mt-0.5 font-medium">Duration: 60 mins • Multi-source stream signal</p>
-                    </div>
-                    <div className="border-t border-zinc-900/80 pt-3.5">
-                      <span className="text-[9px] font-extrabold text-zinc-400 bg-zinc-800/40 px-2 py-0.5 rounded border border-zinc-800/30 tracking-wider">UP NEXT LIVE</span>
-                      <p className="text-xs font-bold text-zinc-300 mt-2">{getMockSchedule(selectedChannel.name).next}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Helpful Instruction Troubleshooting card */}
-                <div className="bg-[#0e0e14]/60 border border-zinc-900/80 p-5 rounded-3xl flex flex-col justify-between shadow-xl shadow-black/5">
-                  <div>
-                    <div className="flex items-center gap-2 mb-3.5 border-b border-zinc-900/80 pb-2.5">
-                      <HelpCircle className="h-4 w-4 text-amber-500" />
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-300">Troubleshooting Streams</h3>
-                    </div>
-                    <ul className="text-[11px] text-zinc-400 space-y-2 leading-relaxed">
-                      <li>⚠️ IPTV servers are notoriously unstable. If any stream shows offline, try clicking the <strong className="text-white">Reload Stream</strong> trigger inside the player.</li>
-                      <li>🔒 Mixed Contents: Absolute raw HTTP links loaded over HTTPS might be restricted. If a stream fails, load using HTTP or use appropriate deshi network resources.</li>
-                      <li>🌍 Geo-restrictions: Some premium regional channels require local ISP paths.</li>
-                    </ul>
-                  </div>
-                  <div className="mt-4 text-[9px] font-mono text-zinc-600 text-right flex items-center justify-end gap-1.5 border-t border-zinc-900/40 pt-2.5">
-                    <Database className="h-3 w-3 text-amber-500/60" />
-                    Streaming cache bounds: Optimal Buffer enabled
-                  </div>
-                </div>
-
-              </div>
+              
 
             </div>
           ) : (
@@ -830,9 +745,9 @@ export default function App() {
       {/* FOOTER */}
       <footer className="border-t border-zinc-900 bg-[#07070a] py-8 px-4 md:px-8 mt-16 text-center text-xs text-zinc-500">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="leading-relaxed">© 2026 Bengali Live Net IPTV Player. All rights reserved. Streams are publicly available and aggregated for convenience.</p>
+          <p className="leading-relaxed">© 2026 Smart IPTV Player </p>
           <div className="flex items-center gap-4">
-            <span className="text-[10px] text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-md font-bold border border-amber-500/20 tracking-wider">ONLINE PLAYBACK SERVER ENTRANCE LIVE</span>
+            
           </div>
         </div>
       </footer>
