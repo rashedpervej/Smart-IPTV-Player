@@ -518,17 +518,7 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
           </span>
         </div>
         <div className="pointer-events-auto flex items-center gap-1.5">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowDiagnostics(!showDiagnostics);
-            }}
-            className="p-1.5 px-2.5 bg-zinc-900/80 hover:bg-zinc-900 border border-zinc-800/80 backdrop-blur-sm rounded-lg text-zinc-200 hover:text-white transition-all text-[10px] font-bold flex items-center gap-1.5 cursor-pointer"
-            title="Stream Debug Diagnostics"
-          >
-            <Activity className="h-3 w-3 text-amber-500" />
-            Diagnostics
-          </button>
+          {/* Diagnostics button hidden for clean user experience - can be restored if needed */}
         </div>
       </div>
 
