@@ -305,10 +305,11 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
       <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black">
         <video
           ref={videoRef}
-          className="w-full h-full object-contain"
+          className="w-full h-full object-contain cursor-pointer"
           playsInline
           autoPlay
           muted={isMuted}
+          onClick={togglePlay}
         />
         
         {/* Banner Overlays & Messages (Ad-block warning, offline warnings, direct file info) */}
@@ -453,7 +454,7 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
       )}
 
       {/* Top Bar overlay - Brand / Channel description */}
-      <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 to-transparent flex justify-between items-start opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 pointer-events-none">
+      <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 to-transparent flex justify-between items-start opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 z-10 pointer-events-none">
         <div className="flex items-center gap-2">
           <div className="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-amber-600 text-[10px] text-stone-950 font-black tracking-widest uppercase rounded">
             Live TV
@@ -478,7 +479,7 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
       </div>
 
       {/* Bottom custom custom controls panel */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#050508] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex flex-col gap-2">
+      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#050508] to-transparent opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 z-10 flex flex-col gap-2">
         <div className="flex items-center justify-between pointer-events-auto">
           {/* Left Controls */}
           <div className="flex items-center gap-3">
@@ -513,7 +514,7 @@ export default function HlsPlayer({ url, name, category, onStatusChange }: HlsPl
                 step="0.05"
                 value={isMuted ? 0 : volume}
                 onChange={handleVolumeChange}
-                className="w-16 md:w-24 h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-amber-500 scale-x-0 group-hover/volume:scale-x-100 origin-left transition-transform duration-200"
+                className="w-16 md:w-24 h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-amber-500 scale-x-100 lg:scale-x-0 lg:group-hover/volume:scale-x-100 origin-left transition-transform duration-200"
               />
             </div>
           </div>
